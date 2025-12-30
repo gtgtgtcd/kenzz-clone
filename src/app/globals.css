@@ -1,0 +1,144 @@
+@import "tailwindcss";
+
+/* =========================================
+   1. THEME CONFIGURATION (بديل tailwind.config.ts)
+   ========================================= */
+@theme {
+  /* تعريف الخطوط */
+  --font-cairo: var(--font-cairo); 
+  --font-sans: var(--font-cairo);
+
+  /* ألوان أوتوسبير الحديثة */
+  --color-primary: #e31e24; /* الأحمر الناري المميز */
+  --color-primary-hover: #c9181d;
+  
+  --color-secondary: #001d3d; /* الكحلي العميق بتاع اللوجو */
+  
+  --color-accent: #f8f9fa; /* رمادي فاتح جداً للفواصل */
+  
+  /* استبدال الألوان القديمة بالألوان الجديدة */
+  --color-slate-900: #001d3d; /* خلينا الـ Slate 900 هو الكحلي بتاعهم */
+  --color-amber-500: #e31e24; /* وخلينا الـ Amber هو الأحمر بتاعهم */
+  --color-amber-600: #c9181d;
+}
+
+/* =========================================
+   2. DARK MODE ACTIVATION (السطر السحري 🔥)
+   ========================================= */
+/* هذا السطر يجبر Tailwind v4 على تفعيل الوضع الليلي عند وجود كلاس 'dark' */
+@variant dark (&:where(.dark, .dark *));
+
+/* =========================================
+   3. BASE STYLES
+   ========================================= */
+:root {
+  --background: #f8fafc;
+  --foreground: #0f172a;
+}
+
+/* ألوان الوضع المظلم الافتراضية للـ CSS الخام */
+.dark {
+  --background: #0f172a;
+  --foreground: #f8fafc;
+}
+
+@layer base {
+  body {
+    @apply text-slate-900 dark:text-gray-50 bg-[#f8fafc] dark:bg-[#0f172a] transition-colors duration-300;
+    font-family: var(--font-cairo), sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+/* =========================================
+   CUSTOM SCROLLBAR
+   ========================================= */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f1f1; 
+}
+.dark ::-webkit-scrollbar-track {
+  background: #1e293b; 
+}
+::-webkit-scrollbar-thumb {
+  background: #ccc; 
+  border-radius: 4px;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #475569; 
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #e31e24; 
+}
+
+/* =========================================
+   ANIMATIONS
+   ========================================= */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-up {
+  animation: fadeInUp 0.5s ease-out forwards;
+}
+
+/* =========================================
+   PERFORMANCE HACK: SCROLL FREEZE ❄️
+   ========================================= */
+.is-scrolling , .is-scrolling * {
+  pointer-events: none !important;
+}
+
+/* =========================================
+   IMAGE PROTECTION 🛡️
+   ========================================= */
+img {
+  -webkit-user-drag: none;
+  -khtml-user-drag: none;
+  -moz-user-drag: none;
+  -o-user-drag: none;
+  user-drag: none;
+  pointer-events: auto; 
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* =========================================
+   AUTOMATIC WATERMARK (THE CAPTAIN SEAL) ⚓
+   ========================================= */
+div:has(> img):not(.no-watermark)::after, 
+span:has(> img):not(.no-watermark)::after {
+  content: "AL CAPTAIN"; 
+  
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-45deg);
+  
+  font-size: 1.5rem; 
+  font-weight: 900;
+  white-space: nowrap;
+  
+  /* ألوان الختم (شفاف ومدمج) */
+  color: rgba(255, 255, 255, 0.15); 
+  text-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+  mix-blend-mode: overlay; 
+  
+  z-index: 10;
+  pointer-events: none; 
+  
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 100px,
+    rgba(255, 255, 255, 0.05) 100px,
+    rgba(255, 255, 255, 0.05) 150px
+  );
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
