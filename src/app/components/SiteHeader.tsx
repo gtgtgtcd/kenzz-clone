@@ -70,7 +70,7 @@ const useSmartUser = () => {
 export const GlobalSidebar = ({ isOpen, onClose }: any) => {
   const { user, avatarUrl, fullName } = useSmartUser();
   const { closeCart } = useCart(); 
-  
+   
   const [imgError, setImgError] = useState(false);
   useEffect(() => { setImgError(false); }, [avatarUrl]);
   const isLoggedIn = !!user;
@@ -95,7 +95,7 @@ export const GlobalSidebar = ({ isOpen, onClose }: any) => {
         className={`fixed inset-0 top-[56px] lg:top-[76px] bg-black/50 z-[99] transition-opacity duration-500 cursor-pointer ${isOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`}
         onClick={onClose}
       ></div>
-      
+       
       <aside 
         className={`fixed top-[56px] lg:top-[76px] right-0 h-[calc(100vh-56px)] lg:h-[calc(100vh-76px)] w-[280px] lg:w-[300px] bg-white z-[100] shadow-2xl border-l border-gray-100 transform transition-transform duration-500 cubic-bezier(0.32, 0.72, 0, 1) flex flex-col ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
       >
@@ -105,7 +105,7 @@ export const GlobalSidebar = ({ isOpen, onClose }: any) => {
               <p className="text-sm text-gray-500 font-black px-3 mb-3 uppercase tracking-wider">التنقل السريع</p>
               <div className="space-y-2">
                 <Link href="/" onClick={handleNavigation} className="flex items-center gap-4 px-4 py-4 rounded-2xl bg-gray-50 text-[#6c0dfa] font-black text-lg hover:bg-[#6c0dfa] hover:text-white transition-all group cursor-pointer shadow-sm">
-                  <Image src="/logo/homeIconActive.svg" width={32} height={32} alt="Home" className="group-hover:brightness-0 group-hover:invert transition-all" />
+                  <Image src="/logo/homeIconActive.svg" width={32} height={32} alt="Home" className="transition-all" />
                   الرئيسية
                 </Link>
                 <Link href="/offers" onClick={handleNavigation} className="flex items-center gap-4 px-4 py-4 rounded-2xl text-gray-700 font-bold text-base hover:bg-red-50 hover:text-[#e31e24] transition-all group cursor-pointer hover:shadow-md">
@@ -202,7 +202,7 @@ const UserMenu = ({ isMobile = false, setIsSidebarOpen }: { isMobile?: boolean, 
   const { closeCart } = useCart(); 
   const [imgError, setImgError] = useState(false); 
   const menuRef = useRef<HTMLDivElement>(null);
-  
+   
   // States for Editing
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -212,7 +212,7 @@ const UserMenu = ({ isMobile = false, setIsSidebarOpen }: { isMobile?: boolean, 
 
   useEffect(() => { setImgError(false); }, [avatarUrl]);
   useEffect(() => { setMounted(true); }, []);
-  
+   
   useEffect(() => {
       if (fullName) setNewName(fullName);
   }, [fullName]);
@@ -308,7 +308,7 @@ const UserMenu = ({ isMobile = false, setIsSidebarOpen }: { isMobile?: boolean, 
             .from('users')
             .update({ full_name: newName })
             .eq('id', user.id);
-          
+           
           if (error) throw error;
 
           await supabase.auth.updateUser({
@@ -555,7 +555,7 @@ export const SiteHeader = () => {
   const pathname = usePathname();
   const { isSidebarOpen, setIsSidebarOpen } = useStore();
   const { openCart, closeCart, total, items } = useCart(); 
-  
+   
   // ✅ 1. تعريف حالة الوضع المظلم
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [profileActive, setProfileActive] = useState(false);
@@ -565,7 +565,7 @@ export const SiteHeader = () => {
     if (typeof window !== 'undefined') {
       const savedTheme = localStorage.getItem('theme');
       const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      
+       
       if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
         setIsDarkMode(true);
         document.documentElement.classList.add('dark');
@@ -590,7 +590,7 @@ export const SiteHeader = () => {
   };
 
   useEffect(() => {
-     if (!isSidebarOpen) setProfileActive(false);
+      if (!isSidebarOpen) setProfileActive(false);
   }, [isSidebarOpen]);
 
   if (pathname === '/login') return null;
@@ -663,7 +663,11 @@ export const SiteHeader = () => {
                <Link href="/notifications" onClick={closeCart} className="w-10 h-10 hover:bg-purple-50 rounded-full transition-colors flex items-center justify-center hover:text-[#6c0dfa] cursor-pointer" title="الإشعارات">
                  <Bell size={22} strokeWidth={2} />
                </Link>
-               <button className="w-10 h-10 hover:bg-purple-50 rounded-full transition-colors flex items-center justify-center hover:text-[#6c0dfa] cursor-pointer"><Heart size={22} strokeWidth={2} /></button>
+               {/* ======================= التعديل هنا: تم تحويل الزر لرابط المفضلة ======================= */}
+               <Link href="/wishlist" onClick={closeCart} className="w-10 h-10 hover:bg-purple-50 rounded-full transition-colors flex items-center justify-center hover:text-[#6c0dfa] cursor-pointer" title="المفضلة">
+                 <Heart size={22} strokeWidth={2} />
+               </Link>
+               {/* ==================================================================================== */}
                <UserMenu isMobile={false} />
             </div>
             

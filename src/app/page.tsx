@@ -7,6 +7,8 @@ import {
   Search, Truck, Zap, Car, Gem, Filter, ShoppingCart, 
   ArrowLeft, ArrowRight, Loader2, Palette, ChevronDown, X, Eye, PlusCircle, Star, ShieldCheck, Flame 
 } from 'lucide-react';
+import dynamic from 'next/dynamic';
+const Player = dynamic(() => import('@lottiefiles/react-lottie-player').then(mod => mod.Player), { ssr: false });
 
 import { useCart } from './components/CartSystem';
 
@@ -19,7 +21,7 @@ const KENZ_TILES = [
   { name: 'موبايلات', image: '/categorytiles/FinalTiles_Mobiles.webp', slug: 'mobiles' },
   { name: 'فاشون', image: '/categorytiles/FinalTiles_Fashion.webp', slug: 'fashion' },
   { name: 'صحة وجمال', image: '/categorytiles/FinalTiles_Health-Beauty.webp', slug: 'health-beauty' },
-  { name: 'أجهزة منزلية', image: '/categorytiles/FinalTiles_Appliances.webp', slug: 'appliances' },
+  { name: 'أجهزة منزلية', image: '/categorytiles/FinalTiles_Appliaces.webp', slug: 'appliances' },
   { name: 'المطبخ', image: '/categorytiles/FinalTiles_Kitchen.webp', slug: 'kitchen' },
   { name: 'البيت والمكتب', image: '/categorytiles/FinalTiles_Home-Office.webp', slug: 'home-office' },
   { name: 'تلفزيونات', image: '/categorytiles/FinalTiles_TVs.webp', slug: 'tvs' },
@@ -222,23 +224,37 @@ const HeroSlider = () => {
       <div className={FLUID_CONTAINER + " px-2"}> 
         <div className="flex flex-col lg:flex-row gap-4 h-auto lg:h-[300px] xl:h-[320px] justify-center items-stretch">
           
-          <div className="hidden lg:flex w-[240px] xl:w-[280px] 2xl:w-[320px] flex-shrink-0 bg-[#001d3d] rounded-2xl p-6 text-white flex-col justify-between relative overflow-hidden group hover:shadow-xl transition-all duration-300">
-             <div className="absolute top-0 right-0 w-full h-full bg-[#e31e24] rounded-full blur-[100px] opacity-10 group-hover:opacity-20 transition-opacity translate-x-1/2 -translate-y-1/2"></div>
-             <div className="relative z-10">
-               <span className="bg-[#e31e24] text-[10px] font-bold px-2 py-1 rounded text-white inline-block mb-3">عرض خاص</span>
-               <h3 className="text-xl xl:text-2xl font-black leading-tight mb-1">طقم صيانة<br/>كامل</h3>
-               <p className="text-gray-400 text-xs font-bold">بخصم يصل لـ 20%</p>
-             </div>
-             <div className="relative z-10">
-                <div className="flex items-end gap-1 mb-3">
-                  <span className="text-2xl xl:text-3xl font-black text-white">450</span>
-                  <span className="text-sm text-gray-400 line-through mb-1">600</span>
-                  <span className="text-[10px] text-gray-400 mb-1">ج.م</span>
-                </div>
-                <button className="w-full py-2 bg-white text-[#001d3d] rounded-lg font-bold text-xs hover:bg-[#e31e24] hover:text-white transition-colors cursor-pointer">أضف للسلة</button>
-             </div>
-             <Zap className="absolute -bottom-4 -left-4 text-white opacity-5 w-32 h-32 rotate-12" />
+          {/* ================= كارت مهرجان التسوق (النسخة العملاقة - كابتن يوسف) ================= */}
+          <div className="hidden lg:flex w-[240px] xl:w-[280px] 2xl:w-[320px] flex-shrink-0 bg-gradient-to-br from-[#001d3d] via-[#0f172a] to-[#000000] rounded-2xl relative overflow-hidden group hover:shadow-2xl hover:shadow-[#e31e24]/20 transition-all duration-500 border border-white/5">
+              
+              {/* 1. خلفية إضاءة خافتة */}
+              <div className="absolute top-0 right-0 w-full h-full bg-[#e31e24] rounded-full blur-[120px] opacity-10 group-hover:opacity-20 transition-opacity duration-500"></div>
+
+              {/* 2. مسرح الأنيميشن (التعديل الجديد: تكبير ملحوظ) */}
+              {/* خليناه ياخد المساحة كلها وزيادة شوية عشان يبقى مالي مركزه */}
+              <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none">
+                  <div className="w-[115%] h-[115%] flex items-center justify-center group-hover:scale-105 transition-transform duration-700 ease-in-out">
+                       <Player
+                          autoplay
+                          loop
+                          src="/anm/shopping.json"
+                          // الستايل ده بيضمن إنه يملا الكونتينر بتاعه بالكامل
+                          style={{ height: '100%', width: '100%' }}
+                      />
+                  </div>
+              </div>
+
+              {/* 3. الجزء السفلي (الزرار فقط) */}
+              <div className="absolute bottom-0 left-0 w-full z-20 p-3 bg-gradient-to-t from-black/90 via-black/50 to-transparent">
+                  <Link href="/offers" className="w-full py-3 bg-white text-[#001d3d] rounded-xl font-black text-sm hover:bg-[#e31e24] hover:text-white transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2 group/btn">
+                      تسوق الآن 
+                      <span className="bg-[#001d3d] text-white text-[10px] px-1.5 py-0.5 rounded group-hover:bg-white group-hover:text-[#e31e24] transition-colors">50%</span>
+                      <ArrowLeft size={16} className="group-hover/btn:-translate-x-1 transition-transform" />
+                  </Link>
+              </div>
+
           </div>
+          {/* ================= نهاية الكارت ================= */}
 
           <div className="w-full lg:flex-1 h-[160px] md:h-[240px] lg:h-auto relative rounded-2xl overflow-hidden shadow-sm group border border-gray-100">
             {banners.map((src, index) => (
