@@ -5,8 +5,6 @@ import { NextResponse } from 'next/server';
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get('code');
-  
-  // التأكد من وجود معامل next لتوجيه المستخدم للصفحة الصحيحة
   const next = searchParams.get('next') ?? '/';
 
   if (code) {
@@ -27,30 +25,37 @@ export async function GET(request: Request) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     
     if (!error) {
-      // جلب رابط التوجيه من الداتابيز (كما اتفقنا سابقاً) أو استخدام next
+      // جلب رابط التوجيه من الداتابيز
       const { data: setting } = await supabase
         .from('app_settings')
         .select('value')
         .eq('key', 'login_redirect')
         .single();
 
-      let nextPath = setting?.value || next;
+      const nextPath = setting?.value || next;
 
       // ==========================================================
-      // 🔥 التعديل هنا: إضافة علامة ?loggedin=true للرابط
+      // 🔥 الحل السحري (Cookie Method)
       // ==========================================================
-      // نتأكد هل الرابط فيه علامة استفهام أصلاً ولا لأ
-      const separator = nextPath.includes('?') ? '&' : '?';
-      return NextResponse.redirect(`${origin}${nextPath}${separator}loggedin=true`);
+      // بنعمل الرابط بشكل نظيف
+      const redirectUrl = new URL(nextPath, origin);
+      
+      // بنجهز الرد (Redirect)
+      const response = NextResponse.redirect(redirectUrl);
+      
+      // بنلزق فيه كوكي مدته 10 ثواني بس (كفاية لحد ما الصفحة تفتح)
+      response.cookies.set('login_notification', 'true', { 
+        path: '/', 
+        maxAge: 10, // يختفي لوحده بعد 10 ثواني
+        sameSite: 'lax' 
+      });
+
+      return response;
     }
   }
 
-  const { data: errorSetting } = await supabase
-        .from('app_settings')
-        .select('value')
-        .eq('key', 'error_redirect')
-        .single();
-
+  // في حالة الخطأ
+  const { data: errorSetting } = await supabase.from('app_settings').select('value').eq('key', 'error_redirect').single();
   const errorPath = errorSetting?.value || '/login';
   return NextResponse.redirect(`${origin}${errorPath}?error=AuthCallbackError`);
 }
