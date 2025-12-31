@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { useRouter, usePathname, useSearchParams } from 'next/navigation'; // ✅ ضفنا useSearchParams
+import { useRouter, usePathname } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner'; 
 
@@ -10,10 +10,9 @@ export default function GlobalProductWatcher() {
   const queryClient = useQueryClient();
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams(); // ✅ تعريف المتغير
   const [userId, setUserId] = useState<string | null>(null);
 
-  // جلب الـ ID الخاص بالمستخدم الحالي
+  // 1. جلب معرف المستخدم الحالي
   useEffect(() => {
     const getUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -23,19 +22,19 @@ export default function GlobalProductWatcher() {
   }, []);
 
   // ==========================================================
-  // 🔥 الجزء الجديد: رادار إشعار تسجيل الدخول
+  // 2. 🔥 رادار الكوكيز (الجديد لإشعار تسجيل الدخول)
   // ==========================================================
   useEffect(() => {
-    // لو الرابط فيه كلمة loggedin=true
-    if (searchParams.get('loggedin') === 'true') {
-      
-      // 1. تشغيل صوت (اختياري)
-      new Audio('/sounds/success.mp3').play().catch(() => {});
+    // فحص وجود الكوكي
+    const hasLoginCookie = document.cookie.split(';').some((item) => item.trim().startsWith('login_notification=true'));
 
-      // 2. إظهار الإشعار
+    if (hasLoginCookie) {
+      // تشغيل الصوت والإشعار
+      new Audio('/sounds/success.mp3').play().catch(() => {});
+      
       toast.success('أهلاً بك يا كابتن! 👋', {
         description: 'تم تسجيل دخولك بنجاح، نتمنى لك تجربة تسوق ممتعة.',
-        duration: 5000, // مدة الإشعار
+        duration: 5000,
         style: {
             background: '#ffffff',
             border: '1px solid #22c55e',
@@ -44,22 +43,23 @@ export default function GlobalProductWatcher() {
         }
       });
 
-      // 3. تنظيف الرابط (حذف loggedin=true) عشان الإشعار ميظهرش تاني لو عمل ريفريش
-      const params = new URLSearchParams(searchParams.toString());
-      params.delete('loggedin');
-      // بنعمل replace للرابط من غير ما نعمل refresh للصفحة
-      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+      // مسح الكوكي فوراً عشان الإشعار ميظهرش تاني
+      document.cookie = "login_notification=; path=/; max-age=0";
     }
-  }, [searchParams, pathname, router]);
+  }, []); // يشتغل مرة واحدة بس مع تحميل الصفحة
 
-
-  // ... باقي الكود القديم الخاص بـ Realtime كما هو (بدون تغيير) ...
+  // ==========================================================
+  // 3. مراقبة البيانات الحية (Realtime Watchers)
+  // ==========================================================
   useEffect(() => {
+    // [أ] قناة مراقبة المنتجات (عام لكل المستخدمين)
     const productChannel = supabase.channel('global-product-watch')
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'products' }, 
         (payload) => {
+          
+          // حذف منتج
           if (payload.eventType === 'DELETE') {
             const deletedId = payload.old.id.toString();
             queryClient.invalidateQueries({ queryKey: ['newArrivals'] });
@@ -77,6 +77,7 @@ export default function GlobalProductWatcher() {
             }
           }
 
+          // تحديث منتج
           if (payload.eventType === 'UPDATE') {
             const updatedId = payload.new.id.toString();
             const newPrice = payload.new.price;
@@ -102,11 +103,14 @@ export default function GlobalProductWatcher() {
       )
       .subscribe();
 
+    // [ب] قناة مراقبة المستخدم (إشعارات + طلبات)
     const userChannel = supabase.channel('global-user-watcher')
+      // مراقبة الإشعارات
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'notifications' }, 
         (payload) => {
+          // إضافة إشعار جديد
           if (payload.eventType === 'INSERT') {
             if (payload.new.user_id === userId) {
               queryClient.invalidateQueries({ queryKey: ['notifications', userId] });
@@ -118,11 +122,13 @@ export default function GlobalProductWatcher() {
               new Audio('/sounds/notification.mp3').play().catch(() => {});
             }
           }
+          // حذف أو تعديل إشعار
           if (payload.eventType === 'DELETE' || payload.eventType === 'UPDATE') {
             queryClient.invalidateQueries({ queryKey: ['notifications'] });
           }
         }
       )
+      // مراقبة الطلبات (لتحديث البروفايل)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'orders' }, 
@@ -131,6 +137,7 @@ export default function GlobalProductWatcher() {
                              (payload.old && (payload.old as any).user_id === userId); 
 
            if (isMyOrder || payload.eventType === 'DELETE') { 
+              console.log("📦 رادار الطلبات: تم رصد تغيير، جاري تحديث البروفايل...");
               queryClient.invalidateQueries({ queryKey: ['profile-orders'] });
            }
         }
