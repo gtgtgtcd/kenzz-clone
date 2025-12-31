@@ -1,16 +1,16 @@
-import { createClient } from '@supabase/supabase-js';
+import { createBrowserClient } from '@supabase/ssr';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    persistSession: true, // بيضمن إن المستخدم يفضل مسجل دخول والتوكن ميموتش
-    autoRefreshToken: true,
-  },
-  realtime: {
-    params: {
-      eventsPerSecond: 10, // بيزود معدل التقاط الإشارات عشان ميفوتش أي إشعار
+export const supabase = createBrowserClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  {
+    // الخيارات دي عشان الـ Realtime والـ Auth يشتغلوا بكفاءة مع Next.js
+    realtime: {
+      params: {
+        eventsPerSecond: 10, // زي ما أنت عايز عشان الإشعارات السريعة
+      },
     },
-  },
-});
+    // مش محتاج تكتب persistSession: true لأن المكتبة دي بتستخدم الكوكيز تلقائياً
+    // وده أفضل وأأمن بكتير عشان السيرفر يقدر يقرا حالة المستخدم
+  }
+);
